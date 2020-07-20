@@ -23,9 +23,9 @@ def buildOs = 'linux'
 def buildJdk = '8'
 def buildMvn = '3.6.3'
 def runITsOses = ['linux', 'windows']
-def runITsJdks = ['8', '11']
+def runITsJdks = ['8', '11', '14', '15']
 def runITsMvn = '3.6.3'
-def runITscommand = "mvn clean install -Prun-its,embedded -B -U -V" // -DmavenDistro=... -Dmaven.test.failure.ignore=true
+def runITscommand = "mvn clean install -Prun-its,embedded -B -U -T 5C -V" // -DmavenDistro=... -Dmaven.test.failure.ignore=true
 def tests
 
 try {
@@ -60,7 +60,7 @@ node(jenkinsEnv.nodeSelection(osNode)) {
             ], publisherStrategy: 'EXPLICIT') {
 			    // For now: maven-wrapper contains 2 poms sharing the same outputDirectory, so separate clean
 			    sh "mvn clean"
-                sh "mvn ${MAVEN_GOAL} -B -U -e -fae -V -Dmaven.test.failure.ignore=true -P versionlessMavenDist"
+                sh "mvn ${MAVEN_GOAL} -B -U -e -fae -T 5C -V -Dmaven.test.failure.ignore=true -P versionlessMavenDist"
             }
             dir ('apache-maven/target') {
                 stash includes: 'apache-maven-bin.zip,apache-maven-wrapper-*.zip', name: 'maven-dist'
