@@ -43,7 +43,6 @@ import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.collection.DependencyCollectionException;
-import org.eclipse.aether.collection.DependencyGraphTransformer;
 import org.eclipse.aether.collection.DependencySelector;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.graph.DependencyNode;
@@ -61,7 +60,6 @@ import org.eclipse.aether.util.filter.AndDependencyFilter;
 import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
 import org.eclipse.aether.util.graph.selector.AndDependencySelector;
-import org.eclipse.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
 import org.eclipse.aether.util.repository.SimpleArtifactDescriptorPolicy;
 
 /**
@@ -145,20 +143,19 @@ public class DefaultPluginDependenciesResolver
                                                 List<RemoteRepository> repositories, RepositorySystemSession session )
         throws PluginResolutionException
     {
-        return resolveInternal( plugin, null /* pluginArtifact */, dependencyFilter, null /* transformer */,
-                                repositories, session );
+        return resolveInternal( plugin, null /* pluginArtifact */, dependencyFilter,  /* transformer */
+                repositories, session );
     }
 
     public DependencyNode resolve( Plugin plugin, Artifact pluginArtifact, DependencyFilter dependencyFilter,
                                    List<RemoteRepository> repositories, RepositorySystemSession session )
         throws PluginResolutionException
     {
-        return resolveInternal( plugin, pluginArtifact, dependencyFilter, new PlexusUtilsInjector(), repositories,
+        return resolveInternal( plugin, pluginArtifact, dependencyFilter, repositories,
                                 session );
     }
 
     private DependencyNode resolveInternal( Plugin plugin, Artifact pluginArtifact, DependencyFilter dependencyFilter,
-                                            DependencyGraphTransformer transformer,
                                             List<RemoteRepository> repositories, RepositorySystemSession session )
         throws PluginResolutionException
     {
@@ -179,12 +176,8 @@ public class DefaultPluginDependenciesResolver
             DependencySelector selector =
                 AndDependencySelector.newInstance( session.getDependencySelector(), new WagonExcluder() );
 
-            transformer =
-                ChainedDependencyGraphTransformer.newInstance( session.getDependencyGraphTransformer(), transformer );
-
             DefaultRepositorySystemSession pluginSession = new DefaultRepositorySystemSession( session );
             pluginSession.setDependencySelector( selector );
-            pluginSession.setDependencyGraphTransformer( transformer );
 
             CollectRequest request = new CollectRequest();
             request.setRequestContext( REPOSITORY_CONTEXT );
